@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: music-stream
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+
+# Static site (optional alternative)
+# - type: static
+#   name: music-stream-frontend
+#   buildCommand: ""
+#   publishPath: "./frontend"
+#   envVars:
+#     - key: NODE_ENV
+#       value: production
