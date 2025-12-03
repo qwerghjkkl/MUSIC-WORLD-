@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicStream - Spotify-like Music Player</title>
+    <meta name="description" content="Free music streaming service with millions of songs">
+    <meta name="theme-color" content="#1DB954">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- iOS Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MusicStream">
+</head>
+<body>
+    <div class="container">
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loading-spinner">
+                <i class="fas fa-music"></i>
+            </div>
+            <p>Loading MusicStream...</p>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-music"></i>
+                <h1>MusicStream</h1>
+            </div>
+            
+            <nav class="nav-menu">
+                <ul>
+                    <li class="nav-item active" data-page="home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </li>
+                    <li class="nav-item" data-page="search">
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
+                    </li>
+                    <li class="nav-item" data-page="library">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Library</span>
+                    </li>
+                    <li class="nav-item" data-page="playlists">
+                        <i class="fas fa-plus-square"></i>
+                        <span>Playlists</span>
+                    </li>
+                    <li class="nav-item" data-page="liked">
+                        <i class="fas fa-heart"></i>
+                        <span>Liked Songs</span>
+                        <span id="liked-count" class="badge">0</span>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="playlists">
+                <h3><i class="fas fa-list"></i> YOUR PLAYLISTS</h3>
+                <ul id="playlist-list">
+                    <!-- Playlists will be loaded here -->
+                </ul>
+                <button id="create-playlist-btn" class="create-playlist-btn">
+                    <i class="fas fa-plus"></i> Create Playlist
+                </button>
+            </div>
+            
+            <div class="user-section">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Guest User</span>
+                </div>
+                <button id="theme-toggle" class="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="search-container">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" 
+                               id="search-input" 
+                               placeholder="Search songs, artists, albums..."
+                               autocomplete="off">
+                        <div class="search-options">
+                            <select id="search-engine">
+                                <option value="gaama">Gaama</option>
+                                <option value="wynk">Wynk</option>
+                                <option value="jiosaavn">JioSaavn</option>
+                            </select>
+                            <button id="search-btn" class="search-btn">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="top-bar-actions">
+                    <button id="refresh-btn" class="icon-btn" title="Refresh">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button id="settings-btn" class="icon-btn" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div id="page-content">
+                <!-- Home Page (Default) -->
+                <section id="home-page" class="page active">
+                    <div class="welcome-section">
+                        <h2><i class="fas fa-headphones-alt"></i> Welcome to MusicStream</h2>
+                        <p class="subtitle">Stream millions of songs for free</p>
+                        
+                        <div class="quick-actions">
+                            <div class="quick-action-card" data-action="trending">
+                                <i class="fas fa-fire"></i>
+                                <span>Trending Now</span>
+                            </div>
+                            <div class="quick-action-card" data-action="playlists">
+                                <i class="fas fa-list-music"></i>
+                                <span>Browse Playlists</span>
+                            </div>
+                            <div class="quick-action-card" data-action="search">
+                                <i class="fas fa-search"></i>
+                                <span>Search Music</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recent-searches">
+                        <h3><i class="fas fa-history"></i> Recent Searches</h3>
+                        <div id="recent-searches-list" class="recent-list">
+                            <!-- Recent searches will appear here -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Search Results Page -->
+                <section id="search-page" class="page">
+                    <div class="page-header">
+                        <h2><i class="fas fa-search"></i> Search Results</h2>
+                        <div class="results-info">
+                            <span id="results-count">0 results</span>
+                            <select id="sort-results">
+                                <option value="relevance">Sort by Relevance</option>
+                                <option value="popularity">Sort by Popularity</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="results-container" class="results-grid">
+                        <div class="empty-state">
+                            <i class="fas fa-search"></i>
+                            <p>Search for music to see results here</p>
+                            <p class="hint">Try searching for songs, artists, or albums</p>
+                        </div>
+                    </div>
+                    
+                    <div id="loading-results" class="loading-indicator" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Searching...</p>
+                    </div>
+                </section>
+
+                <!-- Lyrics Page -->
+                <section id="lyrics-page" class="page">
+                    <div class="page-header">
+                        <h2><i class="fas fa-microphone"></i> Lyrics</h2>
+                        <button id="copy-lyrics" class="icon-btn">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    
+                    <div id="lyrics-container" class="lyrics-container">
+                        <div class="empty-state">
+                            <i class="fas fa-music"></i>
+                            <p>Select a song to view lyrics</p>
+                            <p class="hint">Play a song to see its lyrics here</p>
+                        </div>
+                    </div>
+                    
+                    <div id="loading-lyrics" class="loading-indicator" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Loading lyrics...</p>
+                    </div>
+                </section>
+
+                <!-- Now Playing Page -->
+                <section id="now-playing-page" class="page">
+                    <div class="now-playing-header">
+                        <h2><i class="fas fa-play-circle"></i> Now Playing</h2>
+                        <div class="track-actions">
+                            <button id="add-to-playlist" class="icon-btn" title="Add to Playlist">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button id="share-track" class="icon-btn" title="Share">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="now-playing-content">
+                        <div class="album-art-large">
+                            <img id="large-track-img" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                                 alt="Album Art">
+                            <div class="album-art-overlay">
+                                <button id="play-large-btn" class="play-large-btn">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="track-details-large">
+                            <h1 id="large-track-title">No Track Selected</h1>
+                            <p id="large-track-artist" class="artist">Select a song to play</p>
+                            <p id="large-track-album" class="album">Album: Unknown</p>
+                            <p id="large-track-duration" class="duration">Duration: --:--</p>
+                            
+                            <div class="track-stats">
+                                <span class="stat">
+                                    <i class="fas fa-play"></i>
+                                    <span id="play-count">0</span> plays
+                                </span>
+                                <span class="stat">
+                                    <i class="fas fa-calendar"></i>
+                                    Released: <span id="release-year">--</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Player Bar (Always Visible) -->
+        <footer class="player-bar">
+            <!-- Left Section: Current Track -->
+            <div class="player-left">
+                <div class="current-track-mini">
+                    <img id="mini-track-img" src="https://via.placeholder.com/40" alt="Album Art">
+                    <div class="track-info-mini">
+                        <h4 id="mini-track-title">No track playing</h4>
+                        <p id="mini-track-artist">Select a song to play</p>
+                    </div>
+                    <button id="mini-like-btn" class="icon-btn" title="Like">
+                        <i class="far fa-heart"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Center Section: Controls -->
+            <div class="player-center">
+                <div class="player-controls">
+                    <button id="shuffle-btn" class="control-btn" title="Shuffle">
+                        <i class="fas fa-random"></i>
+                    </button>
+                    <button id="prev-btn" class="control-btn" title="Previous">
+                        <i class="fas fa-step-backward"></i>
+                    </button>
+                    <button id="play-pause-btn" class="play-btn" title="Play/Pause">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button id="next-btn" class="control-btn" title="Next">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                    <button id="repeat-btn" class="control-btn" title="Repeat">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+                
+                <div class="progress-container">
+                    <span id="current-time" class="time">0:00</span>
+                    <div class="progress-bar">
+                        <input type="range" 
+                               id="progress-slider" 
+                               min="0" 
+                               max="100" 
+                               value="0"
+                               class="slider">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <span id="duration" class="time">0:00</span>
+                </div>
+            </div>
+            
+            <!-- Right Section: Volume & Extras -->
+            <div class="player-right">
+                <button id="lyrics-toggle-btn" class="icon-btn" title="Lyrics">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button id="queue-toggle-btn" class="icon-btn" title="Queue">
+                    <i class="fas fa-list-ol"></i>
+                    <span id="queue-count" class="badge">0</span>
+                </button>
+                <div class="volume-control">
+                    <button id="mute-btn" class="icon-btn" title="Mute">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <div class="volume-slider-container">
+                        <input type="range" 
+                               id="volume-slider" 
+                               min="0" 
+                               max="100" 
+                               value="70"
+                               class="slider">
+                    </div>
+                </div>
+                <button id="fullscreen-btn" class="icon-btn" title="Fullscreen">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+
+            <!-- Hidden Audio Element -->
+            <audio id="audio-player" preload="metadata"></audio>
+        </footer>
+
+        <!-- Queue Modal -->
+        <div id="queue-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-list-ol"></i> Playback Queue</h2>
+                    <span class="close-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="queue-actions">
+                        <button id="clear-queue" class="btn-secondary">
+                            <i class="fas fa-trash"></i> Clear Queue
+                        </button>
+                        <button id="save-queue" class="btn-secondary">
+                            <i class="fas fa-save"></i> Save as Playlist
+                        </button>
+                    </div>
+                    <ul id="queue-list" class="queue-list">
+                        <!-- Queue items will appear here -->
+                    </ul>
+                    <p id="empty-queue" class="empty-state">
+                        <i class="fas fa-list"></i>
+                        <br>
+                        Queue is empty
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-cog"></i> Settings</h2>
+                    <span class="close-settings-modal">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <h3><i class="fas fa-sliders-h"></i> Playback</h3>
+                        <div class="setting-item">
+                            <label for="audio-quality">Audio Quality</label>
+                            <select id="audio-quality">
+                                <option value="auto">Auto (Best Available)</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label for="crossfade">Crossfade (seconds)</label>
+                            <input type="range" id="crossfade" min="0" max="10" value="0">
+                            <span id="crossfade-value">0s</span>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3><i class="fas fa-paint-brush"></i> Appearance</h3>
+                        <div class="setting-item">
+                            <label>Theme</label>
+                            <div class="theme-options">
+                                <button class="theme-option active" data-theme="dark">
+                                    <i class="fas fa-moon"></i> Dark
+                                </button>
+                                <button class="theme-option" data-theme="light">
+                                    <i class="fas fa-sun"></i> Light
+                                </button>
+                                <button class="theme-option" data-theme="auto">
+                                    <i class="fas fa-adjust"></i> Auto
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3><i class="fas fa-database"></i> Storage</h3>
+                        <div class="setting-item">
+                            <label>Cache Management</label>
+                            <button id="clear-cache" class="btn-secondary">
+                                <i class="fas fa-broom"></i> Clear Cache
+                            </button>
+                            <span class="setting-hint">Clears search history and temporary files</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container"></div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(() => {
+                    console.log('Service Worker registered');
+                });
+            });
+        }
+    </script>
+</body>
+</html>
